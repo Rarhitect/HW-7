@@ -21,31 +21,21 @@ struct accumulate_block
 };
 
 template < typename Iterator, typename T >
-T parallel_accumulate(Iterator first, Iterator last, T init)
+T parallel_accumulate(Iterator first, Iterator last, T init, int number_of_threads)
 {
     const std::size_t length = std::distance(first, last);
 
     if (!length)
         return init;
 
-    const std::size_t min_per_thread = 25;
-    const std::size_t max_threads =
-        (length + min_per_thread - 1) / min_per_thread;
+    const std::size_t block_size = length / number_of_threads;
 
-    const std::size_t hardware_threads =
-        std::thread::hardware_concurrency();
-
-    const std::size_t num_threads =
-        std::min(hardware_threads != 0 ? hardware_threads : 2, max_threads);
-
-    const std::size_t block_size = length / num_threads;
-
-    std::vector < T > results(num_threads);
-    std::vector < std::thread > threads(num_threads - 1);
+    std::vector < T > results(number_of_threads);
+    std::vector < std::thread > threads(number_of_threads);
 
     Iterator block_start = first;
 
-    for (std::size_t i = 0; i < (num_threads - 1); ++i)
+    for (std::size_t i = 0; i < number_of_threads; ++i)
     {
         Iterator block_end = block_start;
         std::advance(block_end, block_size);
@@ -57,7 +47,7 @@ T parallel_accumulate(Iterator first, Iterator last, T init)
         block_start = block_end;
     }
 
-    accumulate_block < Iterator, T > ()(block_start, last, results[num_threads - 1]);
+    accumulate_block < Iterator, T > ()(block_start, last, results[number_of_threads - 1]);
 
     std::for_each(threads.begin(), threads.end(),
         std::mem_fn(&std::thread::join));
@@ -71,9 +61,11 @@ int main(int argc, const char * argv[])
 
     std::iota(v.begin(), v.end(), 1);
 
-    std::cout << parallel_accumulate(v.begin(), v.end(), 0) << std::endl;
-
-    system("pause");
+    int number_of_threads;
+    std::cout << "Enter the number of threads: ";
+    std::cin >> number_of_threads;
+    
+    std::cout << parallel_accumulate(std::begin(v), std::end(v), 0, number_of_threads) << std::endl;
     
     return 0;
 }
