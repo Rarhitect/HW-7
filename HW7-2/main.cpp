@@ -10,6 +10,7 @@
 #include <numeric>
 #include <thread>
 #include <vector>
+#include <chrono>
 
 template < typename Iterator, typename T >
 struct accumulate_block
@@ -55,6 +56,19 @@ T parallel_accumulate(Iterator first, Iterator last, T init, int number_of_threa
     return std::accumulate(results.begin(), results.end(), init);
 }
 
+void time_of_work(std::vector< int > v, int number_of_threads)
+{
+    auto begin = std::chrono::system_clock::now();
+    
+    parallel_accumulate(std::begin(v), std::end(v), 0, number_of_threads);
+    
+    auto end = std::chrono::system_clock::now();
+    
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+    
+    std::cout << "Time of work: " << elapsed.count() << " nanoseconds" << std::endl;
+}
+
 int main(int argc, const char * argv[])
 {
     std::vector < int > v(100);
@@ -65,7 +79,7 @@ int main(int argc, const char * argv[])
     std::cout << "Enter the number of threads: ";
     std::cin >> number_of_threads;
     
-    std::cout << parallel_accumulate(std::begin(v), std::end(v), 0, number_of_threads) << std::endl;
+    time_of_work(v, number_of_threads);
     
     return 0;
 }
