@@ -66,7 +66,7 @@ void time_of_work(std::vector< int > v, int number_of_threads)
     
     auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
     
-    std::cout << "Time of work: " << elapsed.count() << " nanoseconds" << std::endl;
+    std::cout << /*"Time of work: " << */elapsed.count() << /*" nanoseconds" << */std::endl;
 }
 
 int main(int argc, const char * argv[])
@@ -79,7 +79,11 @@ int main(int argc, const char * argv[])
     std::cout << "Enter the number of threads: ";
     std::cin >> number_of_threads;
     
-    time_of_work(v, number_of_threads);
+    for(auto i = 0; i < number_of_threads; ++i)
+    {
+        std::cout << i << " ";
+        time_of_work(v, number_of_threads);
+    }
     
     return 0;
 }
