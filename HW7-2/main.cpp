@@ -81,7 +81,7 @@ int main(int argc, const char * argv[])
     
     for(auto i = 0; i < number_of_threads; ++i)
     {
-        std::cout << i << " ";
+        std::cout << i + 1 << " ";
         time_of_work(v, number_of_threads);
     }
     
