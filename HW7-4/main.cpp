@@ -12,20 +12,6 @@
 #include <vector>
 #include <random>
 
-template<typename Container, class Algorithm, class Functor>
-void time_of_work(Container v, Algorithm algorithm, Functor function)
-{
-    auto begin = std::chrono::system_clock::now();
-    
-    algorithm(v, std::begin(v), std::end(v), function);
-    
-    auto end = std::chrono::system_clock::now();
-    
-    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
-    
-    std::cout << "Time of work: " << elapsed.count() << " nanoseconds" << std::endl;
-}
-
 int main(int argc, const char * argv[])
 {
     std::vector< int > v(10);
@@ -36,26 +22,82 @@ int main(int argc, const char * argv[])
     for(auto & element: v)
         element = uni(mersenne);
     
+    //---------------------------------------------------------------------------------------------
     std::cout << "'Accumulate' algorithm:" << std::endl << "Not parallel --- ";
-    time_of_work(v, std::accumulate(std::begin(v), std::end(v), 0, [](int mult, int elem){return mult *= elem;}), [](int mult, int elem){return mult *= elem;});
+    
+    auto begin_1 = std::chrono::system_clock::now();
+    
+    std::accumulate(std::begin(v), std::end(v), 0, [](int mult, int elem){return mult *= elem;});
+    
+    auto end_1 = std::chrono::system_clock::now();
+    auto elapsed1 = std::chrono::duration_cast<std::chrono::nanoseconds>(end_1 - begin_1);
+    
+    std::cout << "Time of work: " << elapsed1.count() << " nanoseconds" << std::endl;
     
     std::cout << "Parallel --- ";
-    time_of_work(v, std::accumulate(std::execution::par, std::begin(v), std::end(v), 0, [](int mult, int elem){return mult *= elem;}), [](int mult, int elem){return mult *= elem;});
+    
+    auto begin_2 = std::chrono::system_clock::now();
+    
+    std::accumulate(std::execution::par, std::begin(v), std::end(v), 0, [](int mult, int elem){return mult *= elem;});
+    
+    auto end_2 = std::chrono::system_clock::now();
+    auto elapsed2 = std::chrono::duration_cast<std::chrono::nanoseconds>(end_2 - begin_2);
+    
+    std::cout << "Time of work: " << elapsed2.count() << " nanoseconds" << std::endl;
+    
     std::cout << "=====================================" << std::endl;
-
+    
+    //---------------------------------------------------------------------------------------------
+    
     std::cout << "'For each' algorithm:" << std::endl << "Not parallel --- ";
-    time_of_work(v, std::for_each(std::begin(v), std::end(v), [](auto & element){element += 11;}), [](auto & element){element += 11;});
+    
+    auto begin_3 = std::chrono::system_clock::now();
+    
+    std::for_each(std::begin(v), std::end(v), [](auto& elem){elem += 11;});
+    
+    auto end_3 = std::chrono::system_clock::now();
+    auto elapsed3 = std::chrono::duration_cast<std::chrono::nanoseconds>(end_3 - begin_3);
+    
+    std::cout << "Time of work: " << elapsed3.count() << " nanoseconds" << std::endl;
     
     std::cout << "Parallel --- ";
-    time_of_work(v, std::for_each(std::execution::par, std::begin(v), std::end(v), [](auto & element){element += 11;}), [](auto & element){element += 11;});
+    
+    auto begin_4 = std::chrono::system_clock::now();
+    
+    std::accumulate(std::execution::par, std::begin(v), std::end(v), [](auto& elem){elem += 11;});
+    
+    auto end_4 = std::chrono::system_clock::now();
+    auto elapsed4 = std::chrono::duration_cast<std::chrono::nanoseconds>(end_4 - begin_4);
+    
+    std::cout << "Time of work: " << elapsed4.count() << " nanoseconds" << std::endl;
+    
     std::cout << "=====================================" << std::endl;
+    
+    //---------------------------------------------------------------------------------------------
 
     std::cout << "'Transform' algorithm:" << std::endl << "Not parallel --- ";
-    time_of_work(v, std::transform(std::begin(v), std::end(v), std::begin(v), [](auto & element){element += 11;}), [](auto & element){element += 11;});
+    
+    auto begin_5 = std::chrono::system_clock::now();
+    
+    std::transform(std::begin(v), std::end(v), std::begin(v), [](auto& elem){elem += 11;});
+    
+    auto end_5 = std::chrono::system_clock::now();
+    auto elapsed5 = std::chrono::duration_cast<std::chrono::nanoseconds>(end_5 - begin_5);
+    
+    std::cout << "Time of work: " << elapsed5.count() << " nanoseconds" << std::endl;
     
     std::cout << "Parallel --- ";
-    time_of_work(v, std::transform(std::execution::par, std::begin(v), std::end(v), std::begin(v), [](auto & element){element += 11;}), [](auto & element){element += 11;});
+    
+    auto begin_6 = std::chrono::system_clock::now();
+    
+    std::accumulate(std::execution::par, std::begin(v), std::end(v), std::begin(v), [](auto& elem){elem += 11;});
+    
+    auto end_6 = std::chrono::system_clock::now();
+    auto elapsed6 = std::chrono::duration_cast<std::chrono::nanoseconds>(end_6 - begin_6);
+    
+    std::cout << "Time of work: " << elapsed6.count() << " nanoseconds" << std::endl;
+    
     std::cout << "=====================================" << std::endl;
-
+    
     return 0;
 }
